@@ -1,6 +1,9 @@
 // LoginPage.ts
 
 class LoginPage {
+  submitButtonSelector = "login";
+  languageSelector = "language-selector";
+  sidebarSelector = "sidebar";
   loginAsDisctrictAdmin(): void {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
   }
@@ -33,6 +36,52 @@ class LoginPage {
     cy.get("#user-profile-name").click();
     cy.get("#sign-out-button").scrollIntoView();
     cy.get("#sign-out-button").contains("Sign Out").should("exist");
+  }
+  
+  ensurePageLoaded() {
+    cy.get("body").should("contain", "Login");
+  }
+
+  clickContributeOnGitHub() {
+    cy.get("https://github.com/ohcnetwork").scrollIntoView().click();
+  }
+
+  clickThirdPartyLicense() {
+    cy.get("/licenses").scrollIntoView().click();
+  }
+
+  selectLanguage(languageCode: string) {
+    cy.get(this.languageSelector).select(languageCode);
+  }
+
+  verifySubmitButtonText(expectedText: string) {
+    cy.get(this.submitButtonSelector).should("have.text", expectedText);
+  }
+
+  switchLanguageAndVerifyButtonText(languageMappings: {
+    [key: string]: string;
+  }) {
+    Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
+      this.selectLanguage(languageCode);
+      cy.wait(500);
+      this.verifySubmitButtonText(expectedText);
+    });
+  }
+
+  selectSidebarLanguage(languageCode: string) {
+    cy.get(this.languageSelector).select(languageCode);
+  }
+
+  verifySidebarText(expectedText: string) {
+    cy.get(this.submitButtonSelector).should("have.text", expectedText);
+  }
+
+  switchLanguageAndVerifySidebars(languageMappings: { [key: string]: string }) {
+    Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
+      this.selectSidebarLanguage(languageCode);
+      cy.wait(500);
+      this.verifySidebarText(expectedText);
+    });
   }
 }
 
