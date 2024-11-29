@@ -1,9 +1,9 @@
 // LoginPage.ts
 
 class LoginPage {
-  submitButtonSelector = "login";
-  languageSelector = "language-selector";
-  sidebarSelector = "sidebar";
+  submitButtonSelector = "#login";
+  languageSelector = "#language-selector";
+  sidebarSelector = "#sidebar";
   loginAsDisctrictAdmin(): void {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
   }
@@ -43,11 +43,11 @@ class LoginPage {
   }
 
   clickContributeOnGitHub() {
-    cy.get("https://github.com/ohcnetwork").scrollIntoView().click();
+     cy.get('a[href="https://github.com/ohcnetwork"]').scrollIntoView().click();
   }
 
   clickThirdPartyLicense() {
-    cy.get("/licenses").scrollIntoView().click();
+     cy.get('a[href="/licenses"]').scrollIntoView().click();
   }
 
   selectLanguage(languageCode: string) {
@@ -73,7 +73,7 @@ class LoginPage {
   }
 
   verifySidebarText(expectedText: string) {
-    cy.get(this.submitButtonSelector).should("have.text", expectedText);
++    cy.get(this.sidebarSelector).should("have.text", expectedText);
   }
 
   switchLanguageAndVerifySidebars(languageMappings: { [key: string]: string }) {
