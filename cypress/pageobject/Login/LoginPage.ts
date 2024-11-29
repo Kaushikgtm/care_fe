@@ -63,8 +63,9 @@ class LoginPage {
   }) {
     Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
       this.selectLanguage(languageCode);
-      cy.wait(500);
-      this.verifySubmitButtonText(expectedText);
+     +  cy.get(this.submitButtonSelector, { timeout: 10000 })
++        .should("be.visible")
++         .and("have.text", expectedText);
     });
   }
 
@@ -78,9 +79,10 @@ class LoginPage {
 
   switchLanguageAndVerifySidebars(languageMappings: { [key: string]: string }) {
     Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
-      this.selectSidebarLanguage(languageCode);
-      cy.wait(500);
-      this.verifySidebarText(expectedText);
+       this.selectLanguage(languageCode);
+       cy.get(this.sidebarSelector, { timeout: 10000 })
++        .should("be.visible")
++        .and("have.text", expectedText);
     });
   }
 }
