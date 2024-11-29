@@ -39,7 +39,10 @@ class LoginPage {
   }
   
   ensurePageLoaded() {
-    cy.get("body").should("contain", "Login");
++    cy.get(this.submitButtonSelector).should("be.visible");
++    cy.get(this.languageSelector).should("be.visible");
++    cy.get("input[id='username']").should("be.visible");
++    cy.get("input[id='password']").should("be.visible");
   }
 
   clickContributeOnGitHub() {
@@ -63,10 +66,15 @@ class LoginPage {
   }) {
     Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
       this.selectLanguage(languageCode);
-     +  cy.get(this.submitButtonSelector, { timeout: 10000 })
-+        .should("be.visible")
-+         .and("have.text", expectedText);
+      +     cy.get(this.languageSelector)
++       .find(`option[value="${languageCode}"]`)
++       .should('exist')
++       .then(() => {
+      +  cy.get(this.submitButtonSelector, { timeout: 10000 })
++    .should("be.visible")
++    .should("have.text", expectedText);
     });
+  });
   }
 
   selectSidebarLanguage(languageCode: string) {
