@@ -1,41 +1,23 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
+import ta from "../../../src/Locale/ta.json";
+import ml from "../../../src/Locale/ml.json";
+import mr from "../../../src/Locale/mr.json";
+import kn from "../../../src/Locale/kn.json";
+import hi from "../../../src/Locale/hi.json";
+
+const locales = { hi, ta, ml, mr, kn };
 
 describe("redirect", () => {
-  const languageMappings = {
-  hi: hi["login"],
-  ta: ta["login"],
-  ml: ml["login"],
-  mr: mr["login"],
-  kn: kn["login"],
-  };
-  const languageSidebars = {
-    hi: {
-      care: hi["care"],
-      goal: hi["goal"],
-      footer_body: hi["footer_body"],
-    },
-    ta: {
-      care: ta["care"],
-      goal: ta["goal"],
-      footer_body: ta["footer_body"],
-    },
-    ml: {
-      care: ml["care"],
-      goal: ml["goal"],
-      footer_body: ml["footer_body"],
-    },
-    mr: {
-      care: mr["care"],
-      goal: mr["goal"],
-      footer_body: mr["footer_body"],
-    },
-    kn: {
-      care: kn["care"],
-      goal: kn["goal"],
-      footer_body: kn["footer_body"],
-    },
-  }
-
+  const languageMappings = Object.fromEntries(
+    Object.entries(locales).map(([langCode, locale]) => [langCode, locale["login"]])
+  );
+   const languageSidebars = Object.fromEntries(
+    Object.entries(locales).map(([langCode, locale]) => [
+      langCode,
+      { care: locale["care"], goal: locale["goal"], footer_body: locale["footer_body"] },
+    ])
+  );
+  
   const loginPage = new LoginPage();
 
   beforeEach(() => {
@@ -66,15 +48,19 @@ describe("redirect", () => {
   });
 
     it("Verify redirection of 'Contribute on GitHub' link", () => {
-    loginPage.clickContributeOnGitHub();
-    cy.url().should("include", "https://github.com/ohcnetwork");
-    cy.get("body").contains("Contribute on GitHub")
+      loginPage.clickContributeOnGitHub();
+      cy.url({ timeout: 10000 }).should("include", "https://github.com/ohcnetwork");
+      cy.get("body", { timeout: 10000 })
+    .should("be.visible")
+    .and("contain", "Contribute on GitHub");
   });
   
   it("Verify redirection of 'Third Party Software License' ", () => {
     loginPage.clickThirdPartyLicense();
-    cy.url().should("include", "/licenses");
-    cy.get("body").contains("Third Party Software License");
+    cy.url({ timeout: 10000 }).should("include", "/licenses");
+    cy.get("body", { timeout: 10000 })
+    .should("be.visible")
+    .and("contain", "Third Party Software License");
   });
 
   it("Switch languages and verify login button text", () => {
