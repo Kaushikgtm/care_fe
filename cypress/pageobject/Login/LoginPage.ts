@@ -1,9 +1,9 @@
 // LoginPage.ts
 
 class LoginPage {
-  submitButtonSelector = "#login";
+  submitButtonSelector = "#Login";
   languageSelector = "#language-selector";
-  sidebarSelector = "#sidebar";
+
   loginAsDisctrictAdmin(): void {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
   }
@@ -52,47 +52,44 @@ class LoginPage {
   clickThirdPartyLicense() {
      cy.get('a[href="/licenses"]').scrollIntoView().click();
   }
+  
+switchLanguageAndVerifyButtonText(languageMappings: { [key: string]: string }) {
+  Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
+    cy.get(this.languageSelector)
+      .find(`option[value="${languageCode}"]`)
+      .should("exist");
 
-  selectLanguage(languageCode: string) {
-    cy.get(this.languageSelector).select(languageCode);
-  }
+    this.selectLanguage(languageCode);
 
-  verifySubmitButtonText(expectedText: string) {
-    cy.get(this.submitButtonSelector).should("have.text", expectedText);
-  }
-
-  switchLanguageAndVerifyButtonText(languageMappings: {
-    [key: string]: string;
-  }) {
-    Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
-      this.selectLanguage(languageCode);
-      +     cy.get(this.languageSelector)
-+       .find(`option[value="${languageCode}"]`)
-+       .should('exist')
-+       .then(() => {
-      +  cy.get(this.submitButtonSelector, { timeout: 10000 })
-+    .should("be.visible")
-+    .should("have.text", expectedText);
-    });
+    cy.get(this.submitButtonSelector, { timeout: 10000 })
+      .should("be.visible")
+      .and("have.text", expectedText);
   });
-  }
+}
 
-  selectSidebarLanguage(languageCode: string) {
-    cy.get(this.languageSelector).select(languageCode);
-  }
+switchLanguageAndVerifySidebars(languageMappings: {
+  [key: string]: { care: string; goal: string; footer_body: string };
+}) {
+  Object.entries(languageMappings).forEach(([languageCode, expectedSidebarText]) => {
+    cy.get(this.languageSelector)
+      .find(`option[value="${languageCode}"]`)
+      .should("exist")
+      .select(languageCode);
 
-  verifySidebarText(expectedText: string) {
-+    cy.get(this.sidebarSelector).should("have.text", expectedText);
-  }
+    cy.get("#care", { timeout: 10000 })
+      .should("be.visible")
+      .and("have.text", expectedSidebarText.care);
 
-  switchLanguageAndVerifySidebars(languageMappings: { [key: string]: string }) {
-    Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
-       this.selectLanguage(languageCode);
-       cy.get(this.sidebarSelector, { timeout: 10000 })
-+        .should("be.visible")
-+        .and("have.text", expectedText);
-    });
-  }
+    cy.get("#goal", { timeout: 10000 })
+      .should("be.visible")
+      .and("have.text", expectedSidebarText.goal);
+
+    cy.get("#footer_body", { timeout: 10000 })
+      .should("be.visible")
+      .and("have.text", expectedSidebarText.footer_body);
+  });
+}
+
 }
 
 export default LoginPage;
