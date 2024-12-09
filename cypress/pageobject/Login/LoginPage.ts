@@ -1,7 +1,6 @@
 // LoginPage.ts
 
 class LoginPage {
-  submitButtonSelector = "#Login";
   languageSelector = "#language-selector";
 
   loginAsDisctrictAdmin(): void {
@@ -54,18 +53,19 @@ class LoginPage {
   }
   
 switchLanguageAndVerifyButtonText(languageMappings: { [key: string]: string }) {
-  Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
-    cy.get(this.languageSelector)
-      .find(`option[value="${languageCode}"]`)
-      .should("exist");
+    Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
+      cy.get(this.languageSelector)
+        .find(`option[value="${languageCode}"]`)
+        .should("exist");
 
-    this.selectLanguage(languageCode);
+      cy.get(this.languageSelector).select(languageCode);
 
-    cy.get(this.submitButtonSelector, { timeout: 10000 })
-      .should("be.visible")
-      .and("have.text", expectedText);
-  });
-}
+      cy.get("button")
+        .contains("login", { timeout: 10000 }) // Direct interaction
+        .should("be.visible")
+        .and("have.text", expectedText);
+    });
+  }
 
 switchLanguageAndVerifySidebars(languageMappings: {
   [key: string]: { care: string; goal: string; footer_body: string };
