@@ -51,45 +51,54 @@ class LoginPage {
   clickThirdPartyLicense() {
      cy.get('a[href="/licenses"]').scrollIntoView().click();
   }
-  
-switchLanguageAndVerifyButtonText(languageMappings: { [key: string]: string }) {
-    Object.entries(languageMappings).forEach(([languageCode, expectedText]) => {
-      cy.get(this.languageSelector)
-        .find(`option[value="${languageCode}"]`)
-        .should("exist");
 
-      cy.get(this.languageSelector).select(languageCode);
+ interface LanguageMapping {
+  [key: string]: {
+    login: string;
+    care: string;
+    goal: string;
+    footer_body: string;
+  };
+}
 
-      cy.get("button")
-        .contains("login", { timeout: 10000 }) // Direct interaction
-        .should("be.visible")
-        .and("have.text", expectedText);
-    });
-  }
-
-switchLanguageAndVerifySidebars(languageMappings: {
-  [key: string]: { care: string; goal: string; footer_body: string };
-}) {
-  Object.entries(languageMappings).forEach(([languageCode, expectedSidebarText]) => {
+switchLanguageAndVerifyButtonText(languageMappings: LanguageMapping) {
+  Object.entries(languageMappings).forEach(([languageCode, texts]) => {
     cy.get(this.languageSelector)
       .find(`option[value="${languageCode}"]`)
       .should("exist")
-      .select(languageCode);
-
-    cy.get("#care", { timeout: 10000 })
-      .should("be.visible")
-      .and("have.text", expectedSidebarText.care);
-
-    cy.get("#goal", { timeout: 10000 })
-      .should("be.visible")
-      .and("have.text", expectedSidebarText.goal);
-
-    cy.get("#footer_body", { timeout: 10000 })
-      .should("be.visible")
-      .and("have.text", expectedSidebarText.footer_body);
+      .then($option => {
+        if ($option.length === 0) {
+          throw new Error(`Language option ${languageCode} not found`);
+        }
+        this.selectLanguage(languageCode);
+        cy.get(this.submitButtonSelector, { timeout: 10000 })
+          .should("be.visible")
+          .and("have.text", texts.login);
+      });
   });
 }
 
+private verifySidebarElement(selector: string, expectedText: string) {
+return cy.get(selector, { timeout: 10000 })
+    .should("be.visible")
+    .and("have.text", expectedText);
+}
+  
+switchLanguageAndVerifySidebars(languageMappings: LanguageMapping) {
+  Object.entries(languageMappings).forEach(([languageCode, texts]) => {
+    cy.get(this.languageSelector)
+      .find(`option[value="${languageCode}"]`)
+      .should("exist")
+      .then($option => {
+        if ($option.length === 0) {
+          throw new Error(`Language option ${languageCode} not found`);
+        }
+        this.selectLanguage(languageCode);
+        this.verifySidebarElement("#care", texts.care);
+        this.verifySidebarElement("#goal", texts.goal);
+        this.verifySidebarElement("#footer_body", texts.footer_body);
+      });
+  });
 }
 
 export default LoginPage;
