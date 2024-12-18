@@ -1,9 +1,28 @@
 import LoginPage from "../../pageobject/Login/LoginPage";
+import ta from "../../../src/Locale/ta.json";
+import ml from "../../../src/Locale/ml.json";
+import mr from "../../../src/Locale/mr.json";
+import kn from "../../../src/Locale/kn.json";
+import hi from "../../../src/Locale/hi.json";
+
+const locales = { hi, ta, ml, mr, kn };
 
 describe("redirect", () => {
+    const languageMappings = Object.fromEntries(
+    Object.entries(locales).map(([langCode, locale]) => [langCode, locale["login"]])
+  );
+
+  const languageSidebars = Object.fromEntries(
+    Object.entries(locales).map(([langCode, locale]) => [
+      langCode,
+      { care: locale["care"], goal: locale["goal"], footer_body: locale["footer_body"] },
+    ])
+  );
   const loginPage = new LoginPage();
 
   beforeEach(() => {
+    cy.awaitUrl("/", true);
+    loginPage.ensurePageLoaded();
     cy.log("Logging in the user devdistrictadmin");
   });
 
@@ -28,4 +47,39 @@ describe("redirect", () => {
     loginPage.ensureLoggedIn();
     cy.url().should("include", "/facility");
   });
+
+  it("Verify redirection of 'Contribute on GitHub' link", () => {
+    loginPage.clickContributeOnGitHub();
+    cy.url({ timeout: 10000 }).should("include", "https://github.com/ohcnetwork");
+    cy.get("body", { timeout: 10000 })
+      .should("be.visible")
+      .and("contain", "Contribute on GitHub");
+  });
+
+    it("Verify redirection of 'Third Party Software License'", () => {
+    loginPage.clickThirdPartyLicense();
+    cy.url({ timeout: 10000 }).should("include", "/licenses");
+    cy.get("body", { timeout: 10000 })
+      .should("be.visible")
+      .and("contain", "Third Party Software License");
+  });
+
+    it("Switch languages and verify login button text", () => {
+    Object.entries(languageMappings).forEach(([lang, expected]) => {
+      cy.log(`Testing login button in language: ${lang}`);
+      loginPage.switchLanguage(lang);
+      loginPage.getSubmitButton().should("have.text", expected);
+    });
+
+     it("Switch languages and verify sidebar items", () => {
+    Object.entries(languageSidebars).forEach(([lang, expected]) => {
+      cy.log(`Testing sidebar in language: ${lang}`);
+      loginPage.switchLanguage(lang);
+      loginPage.getSidebarItems().should(($items) => {
+        expect($items).to.contain(expected.care);
+        expect($items).to.contain(expected.goal);
+        expect($items).to.contain(expected.footer_body);
+      });
+    });
+  }); 
 });
