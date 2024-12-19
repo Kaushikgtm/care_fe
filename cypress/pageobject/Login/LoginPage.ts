@@ -3,6 +3,10 @@ import { users } from "../utils/userConfig";
 interface LanguageMapping {
   [key: string]: {
     login: string;
+  };
+}
+interface SidebarMapping {
+  [key: string]: {
     care: string;
     goal: string;
     footer_body: string;
@@ -11,7 +15,15 @@ interface LanguageMapping {
 
 class LoginPage {
   languageSelector = "#language-selector";
-  submitButtonSelector: string = "#login-button"; 
+  submitButtonSelector: string = "#login-button";
+  sidebarSelectors = {
+    care: "#care",
+    goal: "#goal",
+    footer_body: "#footer_body",
+  };
+  contributeOnGitHubLink = 'a[href="https://github.com/ohcnetwork"]';
+  thirdPartyLicenseLink = 'a[href="/licenses"]';
+
   loginByRole(role: keyof typeof users): void {
     const user = users[role];
     if (!user) {
@@ -99,17 +111,28 @@ class LoginPage {
   verifyForgotPasswordHeading(text: string[]): void {
     cy.verifyContentPresence("#forgot-password-heading", text);
   }
-    clickContributeOnGitHub(): void {
-    cy.get('a[href="https://github.com/ohcnetwork"]').scrollIntoView().click();
+
+  clickContributeOnGitHub(): void {
+    cy.get(this.contributeOnGitHubLink).scrollIntoView().click();
   }
 
   clickThirdPartyLicense(): void {
-    cy.get('a[href="/licenses"]').scrollIntoView().click();
+    cy.get(this.thirdPartyLicenseLink).scrollIntoView().click();
   }
-    selectLanguage(languageCode: string): void {
+
+  switchLanguage(languageCode: string): void {
     cy.get(this.languageSelector).select(languageCode);
   }
-    switchLanguageAndVerifyButtonText(languageMappings: LanguageMapping): void {
+
+  getSubmitButton() {
+    return cy.get(this.submitButtonSelector);
+  }
+
+  getSidebarItems() {
+    return cy.get(`${this.sidebarSelectors.care}, ${this.sidebarSelectors.goal}, ${this.sidebarSelectors.footer_body}`);
+  }
+
+  switchLanguageAndVerifyButtonText(languageMappings: LanguageMapping): void {
     Object.entries(languageMappings).forEach(([languageCode, texts]) => {
       cy.get(this.languageSelector)
         .find(`option[value="${languageCode}"]`)
@@ -118,7 +141,7 @@ class LoginPage {
           if ($option.length === 0) {
             throw new Error(`Language option ${languageCode} not found`);
           }
-          this.selectLanguage(languageCode);
+          this.switchLanguage(languageCode);
           cy.get(this.submitButtonSelector, { timeout: 10000 })
             .should("be.visible")
             .should("have.text", texts.login)
@@ -126,13 +149,15 @@ class LoginPage {
         });
     });
   }
-   private verifySidebarElement(selector: string, expectedText: string): void {
+
+  private verifySidebarElement(selector: string, expectedText: string): void {
     cy.get(selector, { timeout: 10000 })
       .should("be.visible")
       .should("have.text", expectedText)
       .should("not.be.disabled");
   }
-   switchLanguageAndVerifySidebars(languageMappings: LanguageMapping): void {
+
+  switchLanguageAndVerifySidebars(languageMappings: SidebarMapping): void {
     Object.entries(languageMappings).forEach(([languageCode, texts]) => {
       cy.get(this.languageSelector)
         .find(`option[value="${languageCode}"]`)
@@ -141,10 +166,10 @@ class LoginPage {
           if ($option.length === 0) {
             throw new Error(`Language option ${languageCode} not found`);
           }
-          this.selectLanguage(languageCode);
-          this.verifySidebarElement("#care", texts.care);
-          this.verifySidebarElement("#goal", texts.goal);
-          this.verifySidebarElement("#footer_body", texts.footer_body);
+          this.switchLanguage(languageCode);
+          this.verifySidebarElement(this.sidebarSelectors.care, texts.care);
+          this.verifySidebarElement(this.sidebarSelectors.goal, texts.goal);
+          this.verifySidebarElement(this.sidebarSelectors.footer_body, texts.footer_body);
         });
     });
   }
