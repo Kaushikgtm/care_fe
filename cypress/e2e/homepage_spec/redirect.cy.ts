@@ -25,7 +25,6 @@ describe("redirect", () => {
 
   beforeEach(() => {
     cy.awaitUrl("/", true);
-    loginPage.ensureLoggedIn();
     cy.log("Logging in the user devdistrictadmin");
   });
 
